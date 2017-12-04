@@ -1,0 +1,33 @@
+{
+	"extends": [
+		"eslint:recommended"//,
+		//"plugin:vue/recommended"
+	],
+	"parserOptions": {
+		"ecmaVersion": 6,
+		"sourceType": "module",
+		"ecmaFeatures": {
+			"impliedStrict": true,
+			"experimentalObjectRestSpread": true
+		}
+	},
+	"plugins": [
+		"vue"
+	],
+	"rules": {
+		"vue/jsx-uses-vars": 2,
+		"semi": [
+			"warn",
+			"never"
+		],
+		"no-extra-parens":"warn",
+		"block-scoped-var":"warn",
+		"yoda":"warn",
+		"no-empty":"off",
+		"no-undef": "off",
+		"no-unused-vars": "off",
+		"no-console": "off",
+		"no-throw-literal":"error",
+		"no-mixed-spaces-and-tabs":"off"
+	}
+}
