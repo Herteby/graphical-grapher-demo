@@ -29,8 +29,6 @@ Meteor.startup(() => {
         return
     }
 
-    createUser('admin@app.com', '12345', 'ADMIN')
-
     let tags = TAGS.map(name => Tags.insert({name}))
     let groups = GROUPS.map(name => Groups.insert({name}))
 
@@ -40,6 +38,7 @@ Meteor.startup(() => {
             createUser(`user-${idx + 1}@app.com`, '12345', 'ADMIN')
         )
     })
+    createUser('admin@app.com', '12345', 'ADMIN')
 
     _.each(users, (user) => {
         const userPostLink = Users.getLink(user, 'posts')
