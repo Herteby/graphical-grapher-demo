@@ -9,13 +9,14 @@ es5-shim
 ecmascript
 shell-server
 stylus
+accounts-base
+accounts-password
 
-herteby:grapher-vue
+herteby:graphical-grapher
 akryum:vue-component
 akryum:vue-stylus
 cultofcoders:grapher
-cultofcoders:grapher-live
-aldeed:collection2-core
-accounts-base
-accounts-password
 alanning:roles
+aldeed:collection2-core
+
+

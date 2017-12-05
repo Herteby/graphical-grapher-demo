@@ -1,2 +1,2 @@
-import { initialize } from 'meteor/cultofcoders:grapher-live'
+import { initialize } from 'meteor/herteby:graphical-grapher'
 initialize()

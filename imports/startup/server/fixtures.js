@@ -7,6 +7,8 @@ import Posts from '/imports/api/posts/collection'
 import Tags from '/imports/api/tags/collection'
 import Groups from '/imports/api/groups/collection'
 
+import UserSchema from '/imports/api/users/schema'
+
 const USERS = 10
 const POST_PER_USER = 20
 const COMMENTS_PER_POST = 10
@@ -71,6 +73,6 @@ Meteor.startup(() => {
             })
         })
     })
-
+    Users.attachSchema(UserSchema) //dirty hack
     console.log('[ok] fixtures have been loaded.')
 })

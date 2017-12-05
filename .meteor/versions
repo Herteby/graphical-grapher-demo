@@ -19,7 +19,6 @@ caching-html-compiler@1.1.2
 callback-hook@1.0.10
 check@1.2.5
 cultofcoders:grapher@1.3.0
-cultofcoders:grapher-live@1.3.0_1
 dburles:mongo-collection-instances@0.3.5
 ddp@1.4.0
 ddp-client@2.2.0
@@ -38,7 +37,7 @@ email@1.2.3
 es5-shim@4.6.15
 geojson-utils@1.0.10
 herteby:denormalize@0.6.5
-herteby:grapher-vue@1.2.1
+herteby:graphical-grapher@1.0.0
 hot-code-push@1.0.4
 html-tools@1.0.11
 htmljs@1.0.11

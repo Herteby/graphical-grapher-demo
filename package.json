@@ -1,5 +1,5 @@
 {
-  "name": "grapher-live-vue",
+  "name": "graphical-grapher",
   "private": true,
   "scripts": {
     "start": "meteor run"
