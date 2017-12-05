@@ -13,7 +13,7 @@
 			</div>
 		</template>
 		<div v-for="field, key in fields" v-if="!key.includes('.')">
-			<div :class="{node:1, field:1, object:typeof node[key] === 'object', active:node[key]}" @click="clickField(field, key)">
+			<div :class="{node:1, field:1, active:node[key]}" @click="clickField(field, key)">
 				<div><b>{{icon(field.type)}}</b>{{key}}</div>
 				<div v-if="typeof node[key] !== 'object'" class="details">: {{type(key, field.type)}}</div>
 				<div class="hover">
@@ -132,13 +132,14 @@
 	.editor
 		flex-direction column
 	.node
-		padding 5px
+		padding 4px
 		margin 1px
 		border-radius 4px
 		cursor pointer
 		border 1px solid #ccc
 		flex-wrap nowrap
 		flex-basis fill
+		align-items flex-start
 		position relative
 		&.link, &.object
 			b
@@ -167,6 +168,7 @@
 		.details
 			opacity 0.7
 			white-space nowrap
+			align-self flex-end
 		b
 			font-family monospace
 			width 18px

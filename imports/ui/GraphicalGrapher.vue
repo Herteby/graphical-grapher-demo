@@ -2,10 +2,10 @@
 	<div class="graphicalGrapher" v-if="collections">
 		<h1>Graphical Grapher</h1>
 		<div class="collections">
-			<div v-for="collection in Object.keys(collections)" 
-			@click="currentCollection = collection" 
-			:class="{active:currentCollection == collection}">
-				{{collection}}
+			<div v-for="collection, name in collections" 
+			@click="currentCollection = name" 
+			:class="{active:currentCollection == name, noStuff:collection.noStuff}">
+				{{name}}
 			</div>
 		</div>
 		<div v-if="currentCollection" class="options">
@@ -19,7 +19,7 @@
 			</div>			
 			<div>
 				<h2>Query</h2>
-				<textarea v-model="jsonQuery" :class="{query:1,badQuery}"></textarea>
+				<textarea readonly v-model="jsonQuery" :class="{query:1,badQuery}"></textarea>
 			</div>
 			<div>
 				<h2>Result <span>{{result.timeElapsedMs}}ms</span></h2>
@@ -27,8 +27,6 @@
 			</div>
 		</div>
 		<h1 v-else>Choose a collection</h1>
-		<pre>{{collections}}</pre>
-		<pre>{{namedQueries}}</pre>
 	</div>
 </template>
 
@@ -54,7 +52,15 @@
 				if(err){
 					throw err
 				}
-				this.collections = res.collections
+				let collections = res.collections
+				//make collections with no stuff grey and display last in the menu
+				_.each(collections, collection => {
+					if(!_.size(collection.schema) && !_.size(collection.links) && !_.size(collection.reducers)){
+						collection.noStuff = true
+					}
+				})
+				this.collections = _.pickBy(collections, coll => !coll.noStuff)
+				_.each(_.pickBy(collections, coll => coll.noStuff), (val, key) => this.$set(this.collections, key, val))
 				this.namedQueries = res.namedQueries
 			})
 			this.$autoWatch(()=>{
@@ -81,20 +87,8 @@
 				}
 				return this.queries[this.currentCollection]
 			},
-			jsonQuery:{
-				get(){
-					let query = JSON.stringify(this.query, null, '  ')
-					return query
-				},
-				set(val){
-					try{
-						const query = JSON.parse(val)
-						this.queries[this.currentCollection] = query
-						this.badQuery = false
-					} catch(err) {
-						this.badQuery = true
-					}
-				}
+			jsonQuery(){
+				return JSON.stringify(this.query, null, '  ')
 			},
 			dev(){
 				return Meteor.isDevelopment
@@ -125,8 +119,11 @@
 			justify-content center
 			&:hover
 				background #444
+			&.noStuff
+				color #aaa
 			&.active
 				background #0a0
+				color #fff			
 	.options
 		label
 			padding 5px

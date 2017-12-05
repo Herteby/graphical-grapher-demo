@@ -18,19 +18,19 @@ const COMMENT_TEXT_SAMPLES = [
     'Good', 'Bad', 'Neutral'
 ]
 
+const firstnames = ['Linus','Steve','Bill','Mark','Jeff','Tim','Eric']
+const lastnames = ['Torvalds','Jobs','Gates','Zuckerberg','Bezos','Cook','Schmidt']
+
 const createUser = (email, password, roles) => {
     const userId = Accounts.createUser({email, password})
 
     Roles.addUsersToRoles(userId, roles)
-
+    Users.update(userId, {$set:{profile:{firstname:_.sample(firstnames), lastname:_.sample(lastnames)}}})
     return Users.findOne(userId)
 }
 
-Meteor.startup(() => {
-    if (Users.find().count() > 0) {
-        return
-    }
 
+if (!Users.find().count()) {
     let tags = TAGS.map(name => Tags.insert({name}))
     let groups = GROUPS.map(name => Groups.insert({name}))
 
@@ -73,6 +73,6 @@ Meteor.startup(() => {
             })
         })
     })
-    Users.attachSchema(UserSchema) //dirty hack
     console.log('[ok] fixtures have been loaded.')
-})
+}
+Users.attachSchema(UserSchema) //dirty hack
