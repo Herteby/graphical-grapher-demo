@@ -2,7 +2,7 @@
 	<div class="editor">
 		<!--========== SPECIAL FIELDS ==========-->
 		<template v-if="!object">
-			<div v-for="field in ['$filters', '$options']">
+			<div v-for="field in specialFields">
 				<div class="node special" :class="{active:node[field]}" @click="clickSpecial(field)">
 					<div><b>$</b>{{field}}</div>
 				</div>
@@ -73,7 +73,7 @@
 	import _ from 'lodash'
 	export default {
 		name:'Editor',
-		props:['collection', 'node', 'collections', 'object'],
+		props:['collection', 'node', 'collections', 'object', 'lessUsedFields'],
 		data(){
 			return {
 				errors:{}
@@ -85,6 +85,13 @@
 					return this.object
 				}
 				return _.omit(this.collection.schema, '_id')
+			},
+			specialFields(){
+				if(this.lessUsedFields){
+					return ['$filters', '$options', '$filter', '$postFilters', '$postOptions']
+				} else {
+					return ['$filters', '$options']
+				}
 			}
 		},
 		methods:{
@@ -236,8 +243,10 @@
 			opacity 0.7
 			margin-left 3px
 	textarea
-		border 1px solid #ccc
+		border 1px solid #7c7
 		outline none
 		border-radius 4px
 		margin 1px
+		&.error
+			border-color #f88
 </style>
