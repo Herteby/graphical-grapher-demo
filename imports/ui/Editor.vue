@@ -12,21 +12,20 @@
 				</div>
 			</div>
 		</template>
-		<div v-for="field, key in fields" v-if="!key.includes('.')">
+		<div v-for="field, key in fields">
 			<div :class="{node:1, field:1, active:node[key]}" @click="clickField(field, key)">
-				<div><b>{{icon(field.type)}}</b>{{key}}</div>
-				<div v-if="typeof node[key] !== 'object'" class="details">: {{type(key, field.type)}}</div>
+				<div><b>{{icon(field)}}</b>{{key}}</div>
+				<div v-if="typeof node[key] !== 'object'" class="details">: {{type(field) == 'Array' ? `[${contentType(field)}s]` : contentType(field)}}</div>
 				<div class="hover">
 					<div>
-						<div v-for="val, key in field" v-if="key !== 'type'">{{key}}:<span>{{val}}</span></div>
+						<div v-for="val, key in details(field)">{{key}}:<span>{{val}}</span></div>
 					</div>
 				</div>
 			</div>
 			<Editor
-				v-if="typeof node[key] === 'object'"
-				:object="key"
+				v-if="typeof node[key] == 'object'"
+				:object="type(field) == 'Array' ? field.types[0].content.types[0].content : field.types[0].content"
 				:node="node[key]"
-				:collection="collection"
 				:collections="collections">
 			</Editor>
 		</div>
@@ -76,46 +75,45 @@
 		computed:{
 			fields(){
 				if(this.object){
-					console.log(this.object)
-					let fields = _.pickBy(this.collection.schema, (val, key) => key.indexOf(this.object) === 0 && key.length > this.object.length)
-					fields = _.mapKeys(fields, (val, key) => key.slice(key.indexOf('.') + 1))
-					console.log('FIELDS',fields)
-					if(this.collection.schema[this.object].type === 'Array'){
-						delete fields.$
-						fields = _.mapKeys(fields, (val, key) => key.slice(2))
-					}
-					return fields
-				} else {
-					return this.collection.schema
+					return this.object
 				}
+				return this.collection.schema
 			}
 		},
 		methods:{
-			icon(type){
+			icon(field){
+				const type = this.type(field)
 				return {
 					'Object':'{}',
 					'Array':'[]',
 					'String':'""'
 				}[type] || type[0]
 			},
-			type(key, type){
-				if(type === 'Array'){
-					const content = this.collection.schema[key + '.$']
-					if(content){
-						return '[' + content.type + ']'
-					} else {
-						return 'Array'
-					}
+			type(field){
+				if(field.types[0].length == 1){
+					return field.types[0].type
 				} else {
-					return type
+					return field.types.map(type => type.type).join(' || ')
 				}
+			},
+			contentType(field){
+				if(field.types[0].type == 'Array'){
+					return this.type(field.types[0].content)
+				} else if(field.types[0].blackbox){
+					return 'blackbox'
+				} else{
+					return this.type(field)
+				}
+			},
+			details(field){
+				const details = _.omit(field, 'types')
+				details.type = this.type(field)
+				return details
 			},
 			clickField(field, key){
 				if(this.node[key]){
 					this.$delete(this.node, key)
-				} else if(field.type === 'Object' && _.keys(this.fields).find(fieldKey => fieldKey.indexOf(key + '.') === 0)){
-					this.$set(this.node, key, {})
-				} else if(field.type === 'Array' && _.keys(this.fields).find(fieldKey => fieldKey.indexOf(key + '.$.') === 0)){
+				} else if(this.contentType(field) == 'Object') {
 					this.$set(this.node, key, {})
 				} else {
 					this.$set(this.node, key, 1)

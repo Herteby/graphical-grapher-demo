@@ -8,7 +8,7 @@
 				{{name}}
 			</div>
 		</div>
-		<div v-if="currentCollection" class="options">
+		<div class="options">
 			<label v-if="dev"><input type="checkbox" v-model="bypassFirewall">Bypass firewall<span> (not available in production)</span></label>
 			<label><input type="checkbox" v-model="single">Single result</label>
 		</div>
@@ -26,7 +26,8 @@
 				<div class="result">{{result.data}}</div>
 			</div>
 		</div>
-		<h1 v-else>Choose a collection</h1>
+		<h1 v-else style="color:#888">Choose a collection</h1>
+		<pre v-if="currentCollection">{{collections[currentCollection].schema}}</pre>
 	</div>
 </template>
 
@@ -53,6 +54,7 @@
 					throw err
 				}
 				let collections = res.collections
+				console.log(collections.users.schema.emails)
 				//make collections with no stuff grey and display last in the menu
 				_.each(collections, collection => {
 					if(!_.size(collection.schema) && !_.size(collection.links) && !_.size(collection.reducers)){
@@ -109,7 +111,7 @@
 			user-select none
 	.collections
 		border-radius 8px
-		overflow hidden
+		overflow auto
 		div
 			cursor pointer
 			padding 10px

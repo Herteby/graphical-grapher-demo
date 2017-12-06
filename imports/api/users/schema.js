@@ -4,8 +4,20 @@ export default new SimpleSchema({
     _id: {type: String},
     emails: {type: Array},
     'emails.$': {type: Object},
-    'emails.$.address': {type: String},
+    'emails.$.address': {
+        type: String,
+        regEx: SimpleSchema.RegEx.Email
+    },
     'emails.$.verified': {type: Boolean},
+    emails2: {type: Array},
+    'emails2.$': new SimpleSchema({
+        address: {
+            type:String,
+            regEx:SimpleSchema.RegEx.Email
+        },
+        verified:Boolean
+    }),
+    number:SimpleSchema.oneOf(Number, String),
     createdAt: {type: Date},
     services: {type: Object, blackbox: true},
     roles: {type: Array},
