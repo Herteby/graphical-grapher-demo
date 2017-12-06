@@ -11,9 +11,9 @@
 		</template>
 		<!--========== FIELDS ==========-->
 		<div v-for="field, key in fields">
-			<div class="node field" :class="{active:node[key]}" @click="clickField(field, key)" @contextmenu.prevent="$set(node, key, 1)">
+			<div class="node field" :class="{active:node[key]}" @click="clickField(field, key)" @contextmenu.prevent="node[key] == 1 ? $delete(node, key) : $set(node, key, 1)">
 				<div><b>{{icon(field)}}</b>{{key}}</div>
-				<div v-if="typeof node[key] !== 'object'" class="details">: {{type(field) == 'Array' ? `[${contentType(field)}s]` : contentType(field)}}</div>
+				<div v-if="typeof node[key] !== 'object'" class="details">: {{contentType(field, true)}}</div>
 				<div class="hover">
 					<div>
 						<div>{{field.optional ? 'Optional' : 'Required'}}</div>
@@ -90,6 +90,9 @@
 		methods:{
 			icon(field){
 				const type = this.type(field)
+				if(type.includes('||')){
+					return '?'
+				}
 				return {
 					'Object':'{}',
 					'Array':'[]',
@@ -103,9 +106,13 @@
 					return field.types.map(type => type.type).join(' || ')
 				}
 			},
-			contentType(field){
+			contentType(field, forDisplay){
 				if(field.types[0].type == 'Array'){
-					return this.type(field.types[0].content)
+					if(forDisplay){
+						return '[' + this.contentType(field.types[0].content, true) + ']'
+					} else {
+						return this.contentType(field.types[0].content)
+					}
 				} else if(field.types[0].blackbox){
 					return 'Blackbox'
 				} else{
@@ -120,6 +127,7 @@
 				return details
 			},
 			clickField(field, key){
+				console.log(this.contentType(field))
 				if(this.node[key]){
 					this.$delete(this.node, key)
 				} else if(this.contentType(field) == 'Object') {

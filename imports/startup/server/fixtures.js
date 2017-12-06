@@ -6,6 +6,7 @@ import Comments from '/imports/api/comments/collection'
 import Posts from '/imports/api/posts/collection'
 import Tags from '/imports/api/tags/collection'
 import Groups from '/imports/api/groups/collection'
+import SchemaTest from '/imports/api/schemaTest/collection'
 
 import UserSchema from '/imports/api/users/schema'
 

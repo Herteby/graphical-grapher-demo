@@ -47,14 +47,8 @@ function extractCollectionDocumentation() {
         }
 
         extractSchema(DocumentationObject[name], instance)
-        if(name == 'users'){
-            console.log(DocumentationObject[name].schema)
-            if(_.isEqual(DocumentationObject[name].schema.emails, DocumentationObject[name].schema.emails2)){
-                console.log('========SUCCESS=======')
-            } else {
-                console.log('EMAILS', JSON.stringify(DocumentationObject[name].schema.emails, null, '  '))
-                console.log('EMAILS2', JSON.stringify(DocumentationObject[name].schema.emails2, null, '  '))
-            }
+        if(name == 'schemaTest'){
+            console.log(JSON.stringify(DocumentationObject[name].schema.deepObject, null, '  '))
         }
         extractLinks(DocumentationObject[name], instance)
         extractReducers(DocumentationObject[name], instance)
@@ -105,10 +99,6 @@ function formatSchemaType(schema) {
                     if(typeof val == 'function'){
                         definition[key] = val.name
                     }
-                    if(key == 'regEx'){
-                        console.log('======REGEX=====')
-                        console.log(definition[key])
-                    }
                 })
             }
         })
@@ -117,30 +107,39 @@ function formatSchemaType(schema) {
         if(!field){
             return
         }
-        _.each(field.types, (definition) => {
-            if(definition.type == 'Object' && !definition.isSchema){
-                definition.content = {}
-                _.each(schema, (field2, key2) => {
-                    if(key2.indexOf(key) == 0 && key2 !== key){
-                        definition.content[key2.slice(key.length + 1)] = field2
-                        delete schema[key2]
-                    }                    
-                })
-            }
-        })
-    })
-    _.each(schema, (field, key) => {
-        if(!field){
-            return
-        }
-        _.each(field.types, (definition) => {
-            if(definition.type == 'Array'){
-                definition.content = schema[key + '.$']
-                delete schema[key + '.$']
-            }
-        })
+        schemaArray(field, key, schema)
+        schemaObject(field, key, schema)
     })
     return schema
+}
+function schemaArray(field, key, schema){
+    _.each(field.types, (definition) => {
+        if(definition.type == 'Array'){
+            definition.content = schema[key + '.$']
+            schemaArray(definition.content, key + '.$', schema)
+            schemaObject(definition.content, key + '.$', schema)
+            delete schema[key + '.$']
+        }
+    })
+}
+
+function schemaObject(field, key, schema){
+    if(key.indexOf('deep') == 0){
+        console.log(key, field)
+    }
+    _.each(field.types, (definition) => {
+        if(definition.type == 'Object' && !definition.isSchema){
+            definition.content = {}
+            _.each(schema, (field2, key2) => {
+                if(key2.indexOf(key) == 0 && key2 !== key && key2.indexOf('.', key.length + 1) == -1){
+                    schemaArray(field2, key2, schema)
+                    schemaObject(field2, key2, schema)
+                    definition.content[key2.slice(key.length + 1)] = field2
+                    delete schema[key2]
+                }                    
+            })
+        }
+    })
 }
 
 function extractLinks(storage, collection) {
