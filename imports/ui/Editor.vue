@@ -1,24 +1,24 @@
 <template>
 	<div class="editor">
+		<!--========== SPECIAL FIELDS ==========-->
 		<template v-if="!object">
-			<div>
-				<div class="node special">
-					<div><b>$</b>filters (WIP)</div>
+			<div v-for="field in ['$filters', '$options']">
+				<div class="node special" :class="{active:node[field]}" @click="clickSpecial(field)">
+					<div><b>$</b>{{field}}</div>
 				</div>
-			</div>
-			<div>
-				<div class="node special">
-					<div><b>$</b>options (WIP)</div>
-				</div>
+				<textarea v-if="node[field]" :class="{error:errors[field]}" @input="setSpecial(field, $event.target.value)" :ref="field"></textarea>
 			</div>
 		</template>
+		<!--========== FIELDS ==========-->
 		<div v-for="field, key in fields">
-			<div :class="{node:1, field:1, active:node[key]}" @click="clickField(field, key)">
+			<div class="node field" :class="{active:node[key]}" @click="clickField(field, key)" @contextmenu.prevent="$set(node, key, 1)">
 				<div><b>{{icon(field)}}</b>{{key}}</div>
 				<div v-if="typeof node[key] !== 'object'" class="details">: {{type(field) == 'Array' ? `[${contentType(field)}s]` : contentType(field)}}</div>
 				<div class="hover">
 					<div>
+						<div>{{field.optional ? 'Optional' : 'Required'}}</div>
 						<div v-for="val, key in details(field)">{{key}}:<span>{{val}}</span></div>
+						<div v-if="contentType(field) == 'Object'">Right click to include all fields</div>
 					</div>
 				</div>
 			</div>
@@ -30,8 +30,9 @@
 			</Editor>
 		</div>
 		<template v-if="!object">
+			<!--========== REDUCERS ==========-->
 			<div v-for="reducer, key in collection.reducers">
-				<div :class="{node:1,reducer:1,active:node[key]}" @click="node[key] ? $delete(node, key) : $set(node, key, 1)">
+				<div class="node reducer" :class="{active:node[key]}" @click="node[key] ? $delete(node, key) : $set(node, key, 1)">
 					<div><b>()</b>{{key}}</div>
 					<div class="details">: reducer</div>
 					<div class="hover">
@@ -41,9 +42,10 @@
 					</div>
 				</div>
 			</div>
+			<!--========== LINKS ==========-->
 			<div v-for="link, key in collection.links">
-				<div :class="{node:1,link:1,active:node[key]}" @click="node[key] ? $delete(node, key) : $set(node, key, {})">
-					<div><b>&gt;</b>{{key}}</div>
+				<div class="node link" :class="{active:node[key]}" @click="node[key] ? $delete(node, key) : $set(node, key, {})">
+					<div><b>{{link.isOneResult ? '>' : '[]'}}</b>{{key}}</div>
 					<div class="details">: {{link.collection}}</div>
 					<div class="hover">
 						<div>
@@ -72,12 +74,17 @@
 	export default {
 		name:'Editor',
 		props:['collection', 'node', 'collections', 'object'],
+		data(){
+			return {
+				errors:{}
+			}
+		},
 		computed:{
 			fields(){
 				if(this.object){
 					return this.object
 				}
-				return this.collection.schema
+				return _.omit(this.collection.schema, '_id')
 			}
 		},
 		methods:{
@@ -100,14 +107,16 @@
 				if(field.types[0].type == 'Array'){
 					return this.type(field.types[0].content)
 				} else if(field.types[0].blackbox){
-					return 'blackbox'
+					return 'Blackbox'
 				} else{
 					return this.type(field)
 				}
 			},
 			details(field){
-				const details = _.omit(field, 'types')
-				details.type = this.type(field)
+				const details = _.omit(field, 'types', 'optional')
+				_.each(field.types, type => {
+					Object.assign(details, _.omit(type, ['type', 'content']))
+				})
 				return details
 			},
 			clickField(field, key){
@@ -117,6 +126,24 @@
 					this.$set(this.node, key, {})
 				} else {
 					this.$set(this.node, key, 1)
+				}
+			},
+			clickSpecial(field){
+				if(this.node[field]){
+					this.$delete(this.node, field)
+				} else {
+					this.$set(this.node, field, {})
+					this.$nextTick(() => this.$refs[field][0].focus())
+				}
+			},
+			setSpecial(field, val){
+				try{
+					const result = new Function(`return {${val}}`)()
+					console.log(result)
+					this.node[field] = result
+					this.$set(this.errors, field, false)
+				} catch(err){
+					this.$set(this.errors, field, true)
 				}
 			}
 		}
@@ -200,4 +227,9 @@
 		span
 			opacity 0.7
 			margin-left 3px
+	textarea
+		border 1px solid #ccc
+		outline none
+		border-radius 4px
+		margin 1px
 </style>

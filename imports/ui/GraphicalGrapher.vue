@@ -11,6 +11,7 @@
 		<div class="options">
 			<label v-if="dev"><input type="checkbox" v-model="bypassFirewall">Bypass firewall<span> (not available in production)</span></label>
 			<label><input type="checkbox" v-model="single">Single result</label>
+			<label><input type="checkbox" v-model="includeCreate">Add "Collection.createQuery"</label>
 		</div>
 		<div v-if="currentCollection" class="columns">
 			<div>
@@ -19,7 +20,7 @@
 			</div>			
 			<div>
 				<h2>Query</h2>
-				<textarea readonly v-model="jsonQuery" :class="{query:1,badQuery}"></textarea>
+				<textarea readonly v-model="jsonQuery" :class="{query:1,badQuery}" @click="$event.target.select()"></textarea>
 			</div>
 			<div>
 				<h2>Result <span>{{result.timeElapsedMs}}ms</span></h2>
@@ -27,7 +28,6 @@
 			</div>
 		</div>
 		<h1 v-else style="color:#888">Choose a collection</h1>
-		<pre v-if="currentCollection">{{collections[currentCollection].schema}}</pre>
 	</div>
 </template>
 
@@ -45,6 +45,7 @@
 				badQuery:false,
 				single:false,
 				bypassFirewall:false,
+				includeCreate:true,
 				result:{}
 			}
 		},
@@ -90,7 +91,11 @@
 				return this.queries[this.currentCollection]
 			},
 			jsonQuery(){
-				return JSON.stringify(this.query, null, '  ')
+				let query = JSON.stringify(this.query, null, '  ')
+				if(this.includeCreate){
+					query = _.capitalize(this.currentCollection) + '.createQuery(' + query + ')'
+				}
+				return query
 			},
 			dev(){
 				return Meteor.isDevelopment
