@@ -47,9 +47,6 @@ function extractCollectionDocumentation() {
         }
 
         extractSchema(DocumentationObject[name], instance)
-        if(name == 'schemaTest'){
-            console.log(JSON.stringify(DocumentationObject[name].schema.deepObject, null, '  '))
-        }
         extractLinks(DocumentationObject[name], instance)
         extractReducers(DocumentationObject[name], instance)
     })
@@ -124,9 +121,6 @@ function schemaArray(field, key, schema){
 }
 
 function schemaObject(field, key, schema){
-    if(key.indexOf('deep') == 0){
-        console.log(key, field)
-    }
     _.each(field.types, (definition) => {
         if(definition.type == 'Object' && !definition.isSchema){
             definition.content = {}

@@ -57,7 +57,6 @@
 					throw err
 				}
 				let collections = res.collections
-				console.log(collections.users.schema.emails)
 				//make collections with no stuff grey and display last in the menu
 				_.each(collections, collection => {
 					if(!_.size(collection.schema) && !_.size(collection.links) && !_.size(collection.reducers)){
@@ -95,7 +94,7 @@
 			jsonQuery(){
 				let query = JSON.stringify(this.query, null, '  ')
 				if(this.includeCreate){
-					query = _.capitalize(this.currentCollection) + '.createQuery(' + query + ')'
+					query = _.upperFirst(this.currentCollection) + '.createQuery(' + query + ')'
 				}
 				return query
 			},
@@ -148,18 +147,18 @@
 			height 20px
 			width 20px
 	.columns
-		h2
-			margin-top 0
-			span
-				margin-left auto
-				opacity 0.5
-				font-weight normal
 		> div
 			flex-direction column
 			flex-basis 33%
 			flex-grow 1
 			flex-shrink 1
 			padding 10px
+		h2
+			margin-top 0
+			span
+				margin-left auto
+				opacity 0.5
+				font-weight normal
 	.query, .result
 		white-space pre-wrap
 		flex-grow 1
