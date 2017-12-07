@@ -155,7 +155,8 @@
 					const result = new Function(`return {${val}}`)()
 					this.node[field] = result
 					this.$set(this.errors, field, false)
-				} catch(err){
+				} catch(error){
+					console.dir(error)
 					this.$set(this.errors, field, true)
 				}
 			}
@@ -240,13 +241,13 @@
 		span
 			opacity 0.7
 			margin-left 3px
-	textarea
-		border 1px solid #ccc
-		outline none
-		border-radius 4px
-		margin 1px
-		&:focus
-			border-color #7c7
-		&.error
-			border-color #f88
+		textarea
+			border 1px solid #ccc
+			outline none
+			border-radius 4px
+			margin 1px
+			&:focus
+				border-color #7c7
+			&.error
+				border-color #f88
 </style>
