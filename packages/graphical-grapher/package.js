@@ -11,7 +11,7 @@ Package.describe({
 })
 
 Npm.depends({
-    'lodash.clonedeep': '4.5.0',
+    'lodash': '4.17.4',
 })
 
 Package.onUse(function(api) {

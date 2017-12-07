@@ -134,6 +134,7 @@
 				return details
 			},
 			clickField(field, key){
+				console.log(this.contentType(field))
 				if(this.node[key]){
 					this.$delete(this.node, key)
 				} else if(this.contentType(field) == 'Object') {
@@ -153,10 +154,10 @@
 			setSpecial(field, val){
 				try{
 					const result = new Function(`return {${val}}`)()
+					console.log(result)
 					this.node[field] = result
 					this.$set(this.errors, field, false)
-				} catch(error){
-					console.dir(error)
+				} catch(err){
 					this.$set(this.errors, field, true)
 				}
 			}
@@ -241,13 +242,13 @@
 		span
 			opacity 0.7
 			margin-left 3px
-		textarea
-			border 1px solid #ccc
-			outline none
-			border-radius 4px
-			margin 1px
-			&:focus
-				border-color #7c7
-			&.error
-				border-color #f88
+	textarea
+		border 1px solid #ccc
+		outline none
+		border-radius 4px
+		margin 1px
+		&:focus
+			border-color #7c7
+		&.error
+			border-color #f88
 </style>

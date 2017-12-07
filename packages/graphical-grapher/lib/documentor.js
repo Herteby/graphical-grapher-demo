@@ -1,5 +1,5 @@
 import {LinkConstants, NamedQueryStore} from 'meteor/cultofcoders:grapher'
-import deepClone from 'lodash.clonedeep'
+import _ from 'lodash'
 import SimpleSchema from 'simpl-schema'
 
 export default function extract() {
@@ -43,7 +43,7 @@ function extractCollectionDocumentation() {
         DocumentationObject[name]['isExposed'] = isExposed
 
         if (isExposed && instance.__exposure.config.body) {
-            DocumentationObject[name]['exposureBody'] = deepClone(instance.__exposure.config.body)
+            DocumentationObject[name]['exposureBody'] = _.cloneDeep(instance.__exposure.config.body)
         }
 
         extractSchema(DocumentationObject[name], instance)
@@ -59,7 +59,7 @@ function extractSchema(storage, collection) {
     storage.schema = {}
 
     if (collection.simpleSchema && collection.simpleSchema()) {
-        storage.schema = deepClone(collection.simpleSchema()._schema)
+        storage.schema = _.cloneDeep(collection.simpleSchema()._schema)
 
         formatSchemaType(storage.schema)
     }
@@ -71,7 +71,7 @@ function extractReducers(storage, collection) {
     if (collection.__reducers) {
         _.each(collection.__reducers, (value, key) => {
             storage.reducers[key] = {
-                body: deepClone(value.body)
+                body: _.cloneDeep(value.body)
             }
         })
     }
@@ -82,7 +82,7 @@ function formatSchemaType(schema) {
         if(!field){
             return
         }
-        Object.assign(field, _.omit(field.types, 'definitions'))
+        _.assign(field, _.omit(field.types, 'definitions'))
         field.types = field.type.definitions
         delete field.type
 
