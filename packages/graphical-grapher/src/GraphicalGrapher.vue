@@ -11,21 +11,27 @@
 		<div class="options">
 			<label v-if="dev"><input type="checkbox" v-model="bypassFirewall">Bypass firewall<span> (not available in production)</span></label>
 			<label><input type="checkbox" v-model="single">Single result</label>
-			<label><input type="checkbox" v-model="includeCreate">Add "Collection.createQuery"</label>
-			<label><input type="checkbox" v-model="lessUsedFields">Show less used fields</label>
-		</div>
+			<label><input type="checkbox" v-model="includeCreate_">Add "Collection.createQuery"</label>
+			<label><input type="checkbox" v-model="showLessUsed">Show less used fields</label>
+			</div>
 		<div v-if="currentCollection" class="columns">
 			<div>
 				<h2>Editor</h2>
-				<Editor :collection="collections[currentCollection]" :node="query" :collections="collections" :lessUsedFields="lessUsedFields"></Editor>
+				<Editor
+					:collection="collections[currentCollection]"
+					:node="query"
+					:collections="collections"
+					:lessUsedFields="lessUsedFields"
+					:showLessUsed="showLessUsed">
+				</Editor>
 			</div>			
 			<div>
 				<h2>Query</h2>
 				<textarea readonly v-model="jsonQuery" :class="{query:1,badQuery}" @click="$event.target.select()"></textarea>
 			</div>
 			<div>
-				<h2>Result <span>{{result.timeElapsedMs}}ms</span></h2>
-				<div class="result">{{result.data}}</div>
+				<h2>Result <span>{{result.data && result.data.length}} documents - {{result.timeElapsedMs}}ms</span></h2>
+				<div class="result">{{jsonResult}}</div>
 			</div>
 		</div>
 		<h1 v-else style="color:#888">Choose a collection</h1>
@@ -37,6 +43,26 @@
 	import Editor from './Editor.vue'
 	export default {
 		components:{Editor},
+		props:{
+			indent:{
+				type:String,
+				default:'	'
+			},
+			singleResult:{
+				type:Boolean,
+				default:false
+			},
+			includeCreate:{
+				type:Boolean,
+				default:true
+			},
+			lessUsedFields:{
+				type:Array,
+				default(){
+					return ['$filter','$postFilters','$postOptions']
+				}
+			}
+		},
 		data(){
 			return {
 				collections:undefined,
@@ -44,11 +70,11 @@
 				currentCollection:undefined,
 				queries:{},
 				badQuery:false,
-				single:false,
+				single:this.singleResult,
 				bypassFirewall:false,
-				includeCreate:true,
-				lessUsedFields:false,
-				result:{}
+				includeCreate_:this.includeCreate,
+				showLessUsed:false,
+				result:{},
 			}
 		},
 		created(){
@@ -57,8 +83,7 @@
 					throw err
 				}
 				let collections = res.collections
-				console.log(collections.users.schema.emails)
-				//make collections with no stuff grey and display last in the menu
+				//make collections with no links or schema grey and display them last in the menu
 				_.each(collections, collection => {
 					if(!_.size(collection.schema) && !_.size(collection.links) && !_.size(collection.reducers)){
 						collection.noStuff = true
@@ -68,22 +93,21 @@
 				_.each(_.pickBy(collections, coll => coll.noStuff), (val, key) => this.$set(this.collections, key, val))
 				this.namedQueries = res.namedQueries
 			})
-			this.$autoWatch(()=>{
-				const collection = this.currentCollection
-				if(!collection){
-					return
-				}
-				const body = {[this.currentCollection]:_.cloneDeep(this.query)}
-				if(this.single){
-					_.set(body[this.currentCollection], '$options.limit', 1)
-				}
-				Meteor.call('grapher.live', {
-					body:body,
-					params:undefined,
-					checkUser:!this.bypassFirewall
-				},
-				(err, res) => this.result = res || err)
-			})
+			this.$watch(()=>[this.currentCollection, this.query, this.single, this.bypassFirewall],
+				([collection, query, single, bypass]) => {
+					if(collection){
+						const body = {[collection]:_.cloneDeep(query)}
+						if(single){
+							_.set(body[collection], '$options.limit', 1)
+						}
+						Meteor.call('grapher.live', {
+							body:body,
+							params:undefined,
+							checkUser:!this.bypassFirewall
+						},
+						(err, res) => this.result = res || err)
+					}
+				}, {deep:true})
 		},
 		computed:{
 			query(){
@@ -93,17 +117,17 @@
 				return this.queries[this.currentCollection]
 			},
 			jsonQuery(){
-				let query = JSON.stringify(this.query, null, '  ')
-				if(this.includeCreate){
-					query = _.capitalize(this.currentCollection) + '.createQuery(' + query + ')'
+				let query = JSON.stringify(this.query, null, this.indent)
+				if(this.includeCreate_){
+					query = _.upperFirst(this.currentCollection) + '.createQuery(' + query + ')'
 				}
 				return query
 			},
 			dev(){
 				return Meteor.isDevelopment
 			},
-			cleanedResult(){
-				return _.omitBy(this.result, key => key[0] == '$')
+			jsonResult(){
+				return JSON.stringify(this.result.data, null, '  ')
 			}
 		}
 	}
@@ -118,7 +142,8 @@
 			user-select none
 	.collections
 		border-radius 8px
-		overflow auto
+		overflow hidden
+		flex-wrap wrap
 		div
 			cursor pointer
 			padding 10px
@@ -134,6 +159,8 @@
 				background #0a0
 				color #fff			
 	.options
+		@media (max-width 750px)
+			flex-wrap wrap
 		label
 			padding 5px
 			margin 5px
@@ -144,9 +171,11 @@
 			span
 				opacity 0.5
 				margin-left 5px
+				font-size 12px
 		input
 			height 20px
 			width 20px
+			flex-shrink 0
 	.columns
 		> div
 			flex-direction column
@@ -169,6 +198,7 @@
 		border none
 		outline none
 		resize none
+		tab-size 2
 		&.badQuery
 			color red
 </style>

@@ -62,7 +62,8 @@
 					v-if="node[key]"
 					:node="node[key]"
 					:collection="collections[link.collection]"
-					:collections="collections">
+					:collections="collections"
+					:lessUsedFields="lessUsedFields">
 				</Editor>
 			</div>
 		</template>
@@ -73,7 +74,7 @@
 	import _ from 'lodash'
 	export default {
 		name:'Editor',
-		props:['collection', 'node', 'collections', 'object', 'lessUsedFields'],
+		props:['collection', 'node', 'collections', 'object', 'lessUsedFields', 'showLessUsed'],
 		data(){
 			return {
 				errors:{}
@@ -87,10 +88,11 @@
 				return _.omit(this.collection.schema, '_id')
 			},
 			specialFields(){
-				if(this.lessUsedFields){
-					return ['$filters', '$options', '$filter', '$postFilters', '$postOptions']
+				const fields = ['$filters', '$options', '$filter', '$postFilters', '$postOptions']
+				if(this.showLessUsed){
+					return fields
 				} else {
-					return ['$filters', '$options']
+					return _.difference(fields, this.lessUsedFields)
 				}
 			}
 		},
@@ -134,7 +136,6 @@
 				return details
 			},
 			clickField(field, key){
-				console.log(this.contentType(field))
 				if(this.node[key]){
 					this.$delete(this.node, key)
 				} else if(this.contentType(field) == 'Object') {
@@ -154,10 +155,10 @@
 			setSpecial(field, val){
 				try{
 					const result = new Function(`return {${val}}`)()
-					console.log(result)
 					this.node[field] = result
 					this.$set(this.errors, field, false)
-				} catch(err){
+				} catch(error){
+					console.dir(error)
 					this.$set(this.errors, field, true)
 				}
 			}

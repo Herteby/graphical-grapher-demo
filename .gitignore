@@ -1,5 +1,5 @@
-*.sublime-workspace
-*.sublime-project
 .meteor/local
 .meteor/.
 node_modules
+packages
+*.sublime

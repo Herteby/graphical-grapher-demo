@@ -9,6 +9,13 @@ Vue.prototype.$autoWatch = function(fn, options){
 }
 
 new Vue({
-	el:'#vue',
+	el:'#app',
 	...GraphicalGrapher
 })
+
+/*
+import React from 'react'
+import ReactDOM from 'react-dom'
+import {GraphicalGrapherReact} from 'meteor/herteby:graphical-grapher'
+
+ReactDOM.render(React.createElement(GraphicalGrapherReact, null), document.getElementById('app'))*/
