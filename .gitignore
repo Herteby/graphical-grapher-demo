@@ -1,5 +1,7 @@
 .meteor/local
 .meteor/.
+.meteor/versions
 node_modules
 packages
 *.sublime
+package-lock.json
