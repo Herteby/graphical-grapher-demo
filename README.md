@@ -3,7 +3,7 @@ Demo for Graphical Grapher
 
 ```
 git clone https://github.com/Herteby/grapher-vue-demo.git
-cd graphical-grapher
+cd grapher-vue-demo/
 meteor npm install
 meteor
 
