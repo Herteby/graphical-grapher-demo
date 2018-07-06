@@ -1,9 +1,9 @@
-# Graphical Grapher
+# Graphical Grapher Demo
 Demo for Graphical Grapher
 
 ```
-git clone https://github.com/Herteby/grapher-vue-demo.git
-cd grapher-vue-demo
+git clone https://github.com/Herteby/graphical-grapher-demo.git
+cd graphical-grapher-demo
 meteor npm install
 meteor
 
